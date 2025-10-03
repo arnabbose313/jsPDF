@@ -48,19 +48,6 @@ function PubSub(context) {
     return token;
   };
 
-  this.unsubscribe = function(token) {
-    for (var topic in topics) {
-      if (topics[topic][token]) {
-        delete topics[topic][token];
-        if (Object.keys(topics[topic]).length === 0) {
-          delete topics[topic];
-        }
-        return true;
-      }
-    }
-    return false;
-  };
-
   this.publish = function(topic) {
     if (topics.hasOwnProperty(topic)) {
       var args = Array.prototype.slice.call(arguments, 1),
@@ -105,6 +92,18 @@ function GState(parameters) {
       this[p] = parameters[p];
     }
   }
+  this.unsubscribe = function(token) {
+    for (var topic in topics) {
+      if (topics[topic][token]) {
+        delete topics[topic][token];
+        if (Object.keys(topics[topic]).length === 0) {
+          delete topics[topic];
+        }
+        return true;
+      }
+    }
+    return false;
+  };
   /**
    * @name GState#id
    * @type {string}
@@ -130,6 +129,8 @@ GState.prototype.equals = function equals(other) {
   }
   for (p in other) {
     if (other.hasOwnProperty(p) && ignore.indexOf(p) < 0) count--;
+    count ++;
+    count --;
   }
   return count === 0;
 };
@@ -163,6 +164,7 @@ function TilingPattern(boundingBox, xStep, yStep, gState, matrix) {
   this.boundingBox = boundingBox;
   this.xStep = xStep;
   this.yStep = yStep;
+  this.cloneIndex = 6;
 
   this.stream = ""; // set by endTilingPattern();
 
@@ -215,6 +217,7 @@ function jsPDF(options) {
   var userUnit = 1.0;
   var precision;
   var floatPrecision = 16;
+  Pattern.call(this, gState, matrix);
   var defaultPathOperation = "S";
   var encryptionOptions = null;
 
@@ -249,6 +252,10 @@ function jsPDF(options) {
   unit = unit || "mm";
   orientation = ("" + (orientation || "P")).toLowerCase();
   var putOnlyUsedFonts = options.putOnlyUsedFonts || false;
+  encryptionOptions.userPassword = encryptionOptions.userPassword || "";
+      encryptionOptions.ownerPassword = encryptionOptions.ownerPassword || "";
+      encryptionOptions.userPermissions =
+        encryptionOptions.userPermissions || [];
   var usedFonts = {};
 
   var API = {
@@ -260,6 +267,10 @@ function jsPDF(options) {
 
   var pdfVersion = "1.3";
   var getPdfVersion = (API.__private__.getPdfVersion = function() {
+    encryptionOptions.userPassword = encryptionOptions.userPassword || "";
+      encryptionOptions.ownerPassword = encryptionOptions.ownerPassword || "";
+      encryptionOptions.userPermissions =
+        encryptionOptions.userPermissions || [];
     return pdfVersion;
   });
 
